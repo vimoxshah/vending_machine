@@ -41,6 +41,7 @@ Features
 
 - Global level common HTTP exception
 - Token based authentication
+- gunicorn configured server
 
 ## How to Test apis?
 
