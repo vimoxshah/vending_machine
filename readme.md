@@ -47,3 +47,4 @@ Features
 
 - assuming you have server up and running on port 8000. you can test apis from given postman collection. apart from create user all apis require authentication token that you have to pass in header
 Authorization Token <token> . you can first login using login api by giving username, password you will get token in response that will be valid for 24hrs. now you can use that token in all other api.
+- you can run test cases using `python3 manage.py test`
