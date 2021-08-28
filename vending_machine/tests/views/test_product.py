@@ -50,7 +50,7 @@ class BuyProdutApiTest(TestCase):
             content_type='application/json'
         )
         self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
-        self.assertEqual(json.loads(response.content)['errors'][0]['message'], 'Only Buyer is allowed to buy the product')
+        self.assertEqual(json.loads(response.content)['errors'][0]['message'], 'Only buyer is allowed')
 
         self.client.force_login(self.buyer)
         response = self.client.post(

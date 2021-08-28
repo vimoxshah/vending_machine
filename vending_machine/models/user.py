@@ -18,3 +18,7 @@ class User(AbstractUser, SafeDeleteModel, TenantModel):
 
     class Meta:
         db_table = "auth_user"
+
+    def deposit_amount(self, total_amount):
+        self.deposit -= total_amount
+        self.save()

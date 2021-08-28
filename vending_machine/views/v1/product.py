@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from decorators import require_params
+from decorators import require_params, is_valid_role
 from vending_machine.models import User, Product
 from vending_machine.serializer.product_serializer import ProductSerializer
 from vending_machine.views.exceptions import RequestBodyNotAcceptable, TriggerInternalServerError
@@ -14,23 +14,20 @@ from vending_machine.views.exceptions import RequestBodyNotAcceptable, TriggerIn
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
+@is_valid_role('seller')
 @require_params(["product_name", "cost", "amount_available"])
 def create_product(request):
     payload = request.data
-
-    if request.user.role == 'seller':
-        product = Product.objects.create(product_name=payload['product_name'],
-                                         cost = payload['cost'],
-                                         amount_available=payload['amount_available'],
-                                         seller_id=request.user.id)
-        product = get_object_or_404(Product, pk=product.id)
-        product = ProductSerializer(product)
-        return Response(
-            data=product.data,
-            status=status.HTTP_201_CREATED,
-        )
-    else:
-        raise RequestBodyNotAcceptable('User is not seller')
+    product = Product.objects.create(product_name=payload['product_name'],
+                                     cost = payload['cost'],
+                                     amount_available=payload['amount_available'],
+                                     seller_id=request.user.id)
+    product = get_object_or_404(Product, pk=product.id)
+    product = ProductSerializer(product)
+    return Response(
+        data=product.data,
+        status=status.HTTP_201_CREATED,
+    )
 
 
 
@@ -51,49 +48,40 @@ def get_product(request, id):
 
 
 @api_view(["DELETE"])
+@is_valid_role('seller')
 @permission_classes([IsAuthenticated])
 def delete_product(request, id):
-    if request.user.role == 'seller':
-        product = get_object_or_404(Product, pk=id)
-        product.delete()
-        return Response(
-            status=status.HTTP_200_OK,
-        )
-    else:
-        raise RequestBodyNotAcceptable('User is not seller of given product so he can not delete')
+    product = get_object_or_404(Product, pk=id)
+    product.delete()
+    return Response(
+        status=status.HTTP_200_OK,
+    )
 
 
 @api_view(["PUT"])
+@is_valid_role('seller')
 @permission_classes([IsAuthenticated])
 def update_product(request, id):
     payload = request.data
     product = get_object_or_404(Product, pk=id)
-    if request.user.role == 'seller':
-        if "product_name" in payload:
-            product.product_name = payload['product_name']
-        if "cost" in payload:
-            product.cost = payload['cost']
-        if "amount_available" in payload:
-            product.amount_available = payload['amount_available']
-        product.save(update_fields=['product_name', 'cost', 'amount_available'])
-        return Response(
-            status=status.HTTP_200_OK,
-        )
-    else:
-        raise RequestBodyNotAcceptable('User is not seller of given product so he can not delete')
+    if "product_name" in payload:
+        product.product_name = payload['product_name']
+    if "cost" in payload:
+        product.cost = payload['cost']
+    if "amount_available" in payload:
+        product.amount_available = payload['amount_available']
+    product.save(update_fields=['product_name', 'cost', 'amount_available'])
+    return Response(
+        status=status.HTTP_200_OK,
+    )
 
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
+@is_valid_role('buyer')
 @require_params(["product_id", "amount"])
 def buy_product(request):
-
-
     payload = request.data
-
-    if request.user.role != 'buyer':
-        raise RequestBodyNotAcceptable('Only Buyer is allowed to buy the product')
-
     product_id = payload.get("product_id")
     amount = payload.get('amount')
 
@@ -109,26 +97,11 @@ def buy_product(request):
     if total_amount > user_deposited:
         raise RequestBodyNotAcceptable('Total amount is more than you have deposited. please deposit more coins')
 
-    request.user.deposit -= total_amount
-    request.user.save()
+    request.user.deposit_amount(total_amount)
+    change = product.give_change(user_deposited, total_amount, amount)
 
-    op_change = []
-    allowed_change = [100, 50, 20, 10, 5]
-
-    change = 0
-    if user_deposited > total_amount:
-        change = user_deposited - total_amount
-
-    for ac in allowed_change:
-        op = change // ac
-        if op > 0:
-            op_change.append(ac)
-            change -= op * ac
-
-    product.amount_available -= amount
-    product.save()
     response = {
-        "change": op_change,
+        "change": change,
         "total_spent": total_amount,
         "product": ProductSerializer(product).data
     }

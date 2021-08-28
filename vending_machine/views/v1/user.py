@@ -8,7 +8,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from decorators import require_params
+from decorators import require_params, is_valid_role
 from vending_machine.models import User
 from vending_machine.serializer.user_serializer import UserSerializer
 from vending_machine.services.token_handler import expires_in, token_expire_handler
@@ -128,11 +128,10 @@ def logout(request):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
+@is_valid_role('buyer')
 @require_params(["deposit"])
 def deposit_coins(request):
     deposit = request.data.get('deposit')
-    if request.user.role != 'buyer':
-        raise RequestBodyNotAcceptable('Only buyer is allowed to deposit coins')
     if deposit not in [5, 10, 20, 50, 100]:
         raise RequestBodyNotAcceptable('you can only deposit 5,10,20,50,100 cents')
     request.user.deposit = deposit
@@ -149,9 +148,8 @@ def deposit_coins(request):
 
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
+@is_valid_role('buyer')
 def reset_deposit(request):
-    if request.user.role != 'buyer':
-        raise RequestBodyNotAcceptable('Only buyer is allowed to reset deposit')
     request.user.deposit = 0
     request.user.save()
     user = get_object_or_404(User, pk=request.user.id)

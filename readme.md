@@ -8,7 +8,7 @@
 
 - clone this repo
 - create vritual env using `virtualenv -p python3.7 venv`
-- now you can activate it using `source activate venv/bin/activate`
+- now you can activate it using `source venv/bin/activate`
 - you can load env variables using `source local_export.sh`
 
 - install the requirements using `pip3 install -r vending_machine/requirements.txt`
@@ -42,6 +42,7 @@ Features
 - Global level common HTTP exception
 - Token based authentication
 - gunicorn configured server
+- custom decorators for validations
 
 ## How to Test apis?
 

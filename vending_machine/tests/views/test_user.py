@@ -33,7 +33,7 @@ class BuyProdutApiTest(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
         self.assertEqual(json.loads(response.content)['errors'][0]['message'],
-                         'Only buyer is allowed to deposit coins')
+                         'Only buyer is allowed')
 
         self.client.force_login(self.buyer)
         response = self.client.post(
@@ -52,3 +52,22 @@ class BuyProdutApiTest(TestCase):
             content_type='application/json'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+    def test_reset_deposit(self):
+        self.client.force_login(self.seller)
+        response = self.client.put(
+            'http://localhost:8000/user/reset_deposit',
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+        self.assertEqual(json.loads(response.content)['errors'][0]['message'],
+                         'Only buyer is allowed')
+
+        self.client.force_login(self.buyer)
+        response = self.client.put(
+            'http://localhost:8000/user/reset_deposit',
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(json.loads(response.content)['data']['deposit'], 0)

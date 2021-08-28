@@ -21,3 +21,21 @@ class Product(TimeStampedModel, SafeDeleteModel, TenantModel):
 
     class Meta:
         db_table = "product"
+
+
+    def give_change(self, user_deposited, total_amount, amount):
+        change = 0
+        op_change = []
+        allowed_change = [100, 50, 20, 10, 5]
+        if user_deposited > total_amount:
+            change = user_deposited - total_amount
+
+        for ac in allowed_change:
+            op = change // ac
+            if op > 0:
+                op_change.append(ac)
+                change -= op * ac
+
+        self.amount_available -= amount
+        self.save()
+        return op_change

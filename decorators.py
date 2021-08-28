@@ -19,3 +19,21 @@ def require_params(params):
         return func_wrapper
 
     return decorator
+
+
+def is_valid_role(role):
+    if not isinstance(role, str):
+        raise ImproperlyConfigured
+
+    def decorator(func):
+        def func_wrapper(request, *args, **kwargs):
+
+            if request.user.role != role:
+                raise RequestBodyNotAcceptable(
+                    f"Only {role} is allowed"
+                )
+            return func(request, *args, **kwargs)
+
+        return func_wrapper
+
+    return decorator

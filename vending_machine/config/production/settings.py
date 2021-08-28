@@ -9,12 +9,6 @@ https://docs.djangoproject.com/en/2.1/topics/config/
 For the full list of config and their values, see
 https://docs.djangoproject.com/en/2.1/ref/config/
 """
-import raven
-import sentry_sdk
-from raven.middleware import Sentry
-from sentry_sdk.integrations.celery import CeleryIntegration
-from sentry_sdk.integrations.django import DjangoIntegration
-from sentry_sdk.integrations.redis import RedisIntegration
 
 from vending_machine.config.common import *
 
@@ -70,9 +64,3 @@ LOGGING = {
     },
 }
 
-# For celery
-# RAVEN_CONFIG = {
-#     "environment": "production",  # optional but very useful
-#     # DSN can be obtained from sentry panel
-#     "dsn": os.getenv("SENTRY_URL", ""),
-# }
