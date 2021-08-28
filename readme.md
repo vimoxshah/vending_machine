@@ -43,6 +43,7 @@ Features
 - Token based authentication
 - gunicorn configured server
 - custom decorators for validations
+- configured server logs
 
 ## How to Test apis?
 
