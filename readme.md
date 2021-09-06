@@ -44,6 +44,7 @@ Features
 - gunicorn configured server
 - custom decorators for validations
 - configured server logs
+- Soft delete data
 
 ## How to Test apis?
 
