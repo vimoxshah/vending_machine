@@ -11,7 +11,7 @@
 - now you can activate it using `source venv/bin/activate`
 - you can load env variables using `source local_export.sh`
 
-- install the requirements using `pip3 install -r vending_machine/requirements.txt`
+- install the requirements using `pip3 install -r requirements.txt`
 
 - create database name `vending_machine_development`
 
