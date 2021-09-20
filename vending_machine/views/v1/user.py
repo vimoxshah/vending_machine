@@ -134,7 +134,7 @@ def deposit_coins(request):
     deposit = request.data.get('deposit')
     if deposit not in [5, 10, 20, 50, 100]:
         raise RequestBodyNotAcceptable('you can only deposit 5,10,20,50,100 cents')
-    request.user.deposit = deposit
+    request.user.deposit += deposit
     request.user.save()
     user = get_object_or_404(User, pk=request.user.id)
     serialized_user = UserSerializer(user)
